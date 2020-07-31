@@ -16,10 +16,10 @@ output:
 ---
 class: inverse middle center big-subsection
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning = FALSE}
 knitr::opts_chunk$set(
   fig.width = 10, 
-  fig.height = 3,
+  fig.height = 5,
   fig.align = "center",
   echo = FALSE)
 require(ggiraphExtra)
@@ -29,7 +29,16 @@ library(ggformula)
 library(gifski)
 require(plotly)
 
-theme_set(theme_bw(base_size = 16))
+theme_set(theme_bw(base_size = 26))
+
+survey <- read.csv('data/s245-survey.csv')
+hours_dir <- "C:/Users/Stacy DeRuiter/Dropbox/CalvinTeaching/STAT245/Fall2019/Projects/"
+hours19 <- readr::read_csv(paste(hours_dir, "service-learning-hours.csv", sep = ''))
+hours19 <- hours19 %>%
+  mutate(date = lubridate::mdy_hm(StartDate)) %>%
+  filter(date >= lubridate::mdy_hms('8/31/2019 12:00:00'))
+hours19 <- hours19 %>% group_by(Q1) %>%
+  summarize(total_hours = sum(Q2_1, na.rm = TRUE))
 ```
 
 # Motivation
@@ -94,62 +103,87 @@ Thanks to:
 
 ---
 
-# STAT 245: Advanced Data Analysis
-## A.K.A.: Applied Regression; or, GLMs & Friends
+# Applied Regression; or, GLMs & Friends
+<br>
 
 <p class="aligncenter">
-<img src="images/logistic.png" height="200">
+<img src="images/logistic.png" height="180">
+<!-- <img src="images/birds.png" height="180"> -->
 </p>
+
+<!-- <p class="aligncenter"> -->
+<!-- <img src="images/random-effects.png" height="170"> -->
+<!-- <img src="images/splines.png" height="170"> -->
+<!-- </p> -->
+
+<br>
+<br>
+<br>
+<br>
+<br>
+*images: mfviz.com/hierarchical-models, knowledgebase.aridhia.com/article/logistic-regression/*
 
 ---
 
-# STAT 245: Advanced Data Analysis
-## A.K.A.: Applied Regression; or, GLMs & Friends
+# Applied Regression; or, GLMs & Friends
+<br>
 
 <p class="aligncenter">
-<img src="images/logistic.png" height="200">
-<img src="images/birds.png" height="200">
-</p>
+<img src="images/logistic.png" height="180">
+<img src="images/birds.png" height="180"></p>
+
+<!-- <p class="aligncenter"> -->
+<!-- <img src="images/random-effects.png" height="170"> -->
+<!-- <img src="images/splines.png" height="170"> -->
+<!-- </p> -->
+
+<br>
+<br>
+<br>
+<br>
+<br>
+*images: mfviz.com/hierarchical-models, knowledgebase.aridhia.com/article/logistic-regression/*
 
 ---
 
-# STAT 245: Advanced Data Analysis
-## A.K.A.: Applied Regression; or, GLMs & Friends
+# Applied Regression; or, GLMs & Friends
+<br>
 
 <p class="aligncenter">
-<img src="images/logistic.png" height="200">
-<img src="images/birds.png" height="200">
+<img src="images/logistic.png" height="180">
+<img src="images/birds.png" height="180"></p>
+
+<p class="aligncenter">
+<img src="images/random-effects.png" height="170">
+<!-- <img src="images/splines.png" height="170"> -->
 </p>
 
-<p>
-<img src="images/random-effects.png" height="250">
-</p>
-
+<br>
+*images: mfviz.com/hierarchical-models, knowledgebase.aridhia.com/article/logistic-regression/*
 ---
 
-# STAT 245: Advanced Data Analysis
-## A.K.A.: Applied Regression; or, GLMs & Friends
+# Applied Regression; or, GLMs & Friends
+<br>
 
 <p class="aligncenter">
-<img src="images/logistic.png" height="200">
-<img src="images/birds.png" height="200"></p>
+<img src="images/logistic.png" height="180">
+<img src="images/birds.png" height="180"></p>
 
-<p>
-<img src="images/random-effects.png" height="250">
-<img src="images/splines.png" height="250">
+<p class="aligncenter">
+<img src="images/random-effects.png" height="170">
+<img src="images/splines.png" height="170">
 </p>
 
+<br>
+*images: mfviz.com/hierarchical-models, knowledgebase.aridhia.com/article/logistic-regression/*
 ---
 
 ## Statistical Consultancy as Service Learning
 
----
-# Project Partners
-
 ![calvin partners](images/partners.png)
 ---
 
-# Project partners
+# More (Global) Project partners
 <br><br>
 
 <p>
@@ -160,10 +194,125 @@ Thanks to:
 
 <br><br>
 # Join us? sld33@calvin.edu
+
+*world icon: thenounproject.com*
 ---
 
+# Project Structure 1.0
+
+<br>
+
+<p class="aligncenter">
+<img src='images/report.png' height='400'>
+</p>
+
+<br>
+*icon: flaticon.com*
+
+---
+# Project Structure 1.0: Oops.
+
+<br> 
+
+<p class="aligncenter">
+<img src='images/frustrated-student.jpg' height='300'>
+<img src='images/report.png' height='300'>
+<img src='images/frustrated-person.jpg' height='300'>
+</p>
+
+<br>
+<br>
+<br>
+*icons: flaticon.com, vectorstock.com, icon-library.com*
+
+---
+# Project Structure 2.0
+
+---
+class: inverse middle center big-subsection
+# ? + ? + ?
+---
+
+# Project Structure 2.0: Three Key Questions
+<br>
+<p class="aligncenter">
+<img src='images/books.png' height='120'>
+<img src='images/tidy.jpeg' height='120'>
+<img src='images/splines.png' height='120'>
+<img src='images/random-effects.png' height='120'>
+<img src='images/nigeria-app.png' height='120'>
+</p>
+
+- Annotated Bibliography
+- Tidy Dataset
+- Pretty Figures
+- Regression Model (rationale, results, figures, interpretation)
+- Interactive map or app
+
+<br>
+*icons: thenounproject.com, measureevaluation.org, mfviz.com/hierarchical-models*
+---
+class: inverse middle center big-subsection
+
+# Student Investment
+---
+
+# Student Time Investment (Fall 2019)
+
+## Goal: 40 hours or 4-5 hours per week
+<br>
+
+```{r, echo = FALSE}
+gf_dhistogram(~total_hours, data = hours19, 
+             binwidth = 5,
+             xlab = 'Total Hours Worked per Student',
+             ylab = 'Density')
+```
+---
+# Student Survey (n = 9, or 33%)
+
+- need to fill in results and details here
+
+*Research approved by Calvin University IRB*
+
+---
+# Partner Survey (n = 7, or 50%)
+
+- need to fill in results and details here
+
+*Research approved by Calvin University IRB*
 
 
+---
+
+<iframe src="https://embed.polleverywhere.com/free_text_polls/gv2F355r6IJ7S9F44XRPW?controls=none&short_poll=true" width="800" height="600" frameBorder="0"></iframe>
+---
+
+<iframe src="https://embed.polleverywhere.com/free_text_polls/SURRL1huNvDApz8YnI8Gn?controls=none&short_poll=true" width="800" height="600" frameBorder="0"></iframe>
+---
+# Similar Initiatives
+
+## This session!
+<p class="aligncenter">
+<img src='images/collaboratory.png' height='350'>
+<img src='images/gvsu-consulting-center.png' height='350'>
+</p>
+
+
+---
+# Conclusions and Perspectives
+<br>
+- Projects are wonderful
+- It’s not (too) hard to mastermind
+
+<br>
+###...BUT
+<br>
+
+- Student engagement?
+- Value for partner organizations?
+
+---
 ## Thank You!
 
 <iframe src="https://player.vimeo.com/video/282862249?autoplay=1&title=0&byline=0&portrait=0&muted=1" width="640" height="338" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>

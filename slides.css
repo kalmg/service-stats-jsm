@@ -153,6 +153,10 @@ b, strong {
   font-size: 0.75em;
 }
 
+.aligncenter {
+    text-align: center;
+}
+
 
 .remark-slide-number {
   color: var(--maroon-color);
