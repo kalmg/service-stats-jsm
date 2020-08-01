@@ -21,7 +21,9 @@ knitr::opts_chunk$set(
   fig.width = 10, 
   fig.height = 5,
   fig.align = "center",
-  echo = FALSE)
+  echo = FALSE,
+  dev = 'png', dpi = 600)
+
 require(ggiraphExtra)
 require(moonBook)
 require(tidyverse)
@@ -33,12 +35,12 @@ require(plotly)
 theme_set(theme_bw(base_size = 26))
 
 require(qualtRics)
-whole_survey <- read_survey('data/s245-survey.csv') %>%
+survey <- read_survey('data/s245-survey.csv') %>%
   mutate(person = case_when(Q3 == "A Project Partner. I (and/or my organization) provided data, analysis goals, and support to student researchers." ~ 'partner',
                             Q3 == "A Student. I worked on a project as part of my STAT 245 coursework."  ~ 'student',
                             TRUE ~ 'unknown'))
 
-students <- whole_survey %>%
+students <- survey %>%
   dplyr::filter(person == 'student') %>%
   rename(partner_logistics = Q10_1,
          partner_expectations = Q10_2,
@@ -330,9 +332,9 @@ gf_dhistogram(~total_hours, data = hours19,
 
 ---
 # Student Survey (n = 9, or 33%)
-## Projects made the course...
+## Effects of Projects
 
-```{r, echo = FALSE, fig.width = 10, fig.height = 3.5}
+```{r, echo = FALSE, out.width = '98%'}
 s1 <- students_lik %>%
   filter(question %in% c('course_more_difficult', 
                          'course_more_enjoy',
@@ -345,19 +347,27 @@ s1 <- students_lik %>%
                               TRUE ~ ' '))
 theme_set(theme_void(base_size = 28))
 
+plot_gauges <- function(data, nrows = 1, dir = -1){
 gf_rect(0 + 4 ~ 1 + 2,
-        color = 'grey44', data = s1) %>%
-  gf_rect(0 + mean ~ 1 + 2, data = s1,
-          fill = ~mean)   %>%
-  gf_theme(scale_fill_distiller(palette = 'RdYlGn', direction = 1, limits = c(0,4)),
-           scale_color_distiller(palette = 'RdYlGn', direction = 1, limits = c(0,4)),
-           strip.background = element_blank()
+        color = 'black', fill = 'grey44', size = 2, data = data) %>%
+  gf_rect(0 + mean ~ 1 + 2, 
+          fill = ~mean, color = 'black',
+          size = 2)   %>%
+  gf_theme(scale_fill_distiller(palette = 'RdYlGn', direction = dir, limits = c(0,4)),
+           scale_color_distiller(palette = 'RdYlGn', direction = dir, limits = c(0,4)),
+           strip.background = element_blank(),
+           #strip.text.x = element_blank(),
+           #strip.text = element_text(size = 30)
+           base_size = 100
            ) %>%
   gf_text(0 ~ 0, label = ~mean, color = 'grey44', size = 10) %>%
   gf_refine(coord_polar(theta = "y", start = -pi/2),
             guides(fill = FALSE, color = FALSE)) %>%
   gf_lims(x = c(0, 2), y = c(0,8)) %>% 
-  gf_facet_wrap(~question, nrow = 1)
+  gf_facet_wrap(~question, nrow = nrows)
+}
+
+plot_gauges(s1)
   
 ```
 ---
@@ -374,24 +384,8 @@ s2 <- students_lik %>%
                               question == 'group_comm' ~ "Communication",
                               question == 'effective_group_work' ~ 'Overall Effectiveness',
                               TRUE ~ ' '))
-theme_set(theme_void(base_size = 28))
 
-gf_rect(0 + 4 ~ 1 + 2,
-        color = 'grey44', data = s2) %>%
-  gf_rect(0 + mean ~ 1 + 2, data = s2,
-          fill = ~mean)   %>%
-  gf_theme(scale_fill_distiller(palette = 'RdYlGn', direction = 1, limits = c(0,4)),
-           scale_color_distiller(palette = 'RdYlGn', direction = 1, limits = c(0,4)),
-           strip.background = element_blank(),
-           #strip.text.x = element_blank(),
-           #strip.text = element_text(size = 30)
-           base_size = 100
-           ) %>%
-  gf_text(0 ~ 0, label = ~mean, color = 'grey44', size = 10) %>%
-  gf_refine(coord_polar(theta = "y", start = -pi/2),
-            guides(fill = FALSE, color = FALSE)) %>%
-  gf_lims(x = c(0, 2), y = c(0,8)) %>% 
-  gf_facet_wrap(~question)
+plot_gauges(s2, dir = 1)
   
 ```
 
@@ -425,22 +419,7 @@ s3 <- students_lik %>%
                                          'Tables',
                                          'Models',
                                          'Interpretation'))
-gf_rect(0 + 4 ~ 1 + 2,
-        color = 'grey44', data = s3) %>%
-  gf_rect(0 + mean ~ 1 + 2,
-          fill = ~mean)   %>%
-  gf_theme(scale_fill_distiller(palette = 'RdYlGn', direction = -1, limits = c(0,4)),
-           scale_color_distiller(palette = 'RdYlGn', direction = -1, limits = c(0,4)),
-           strip.background = element_blank(),
-           #strip.text.x = element_blank(),
-           #strip.text = element_text(size = 30)
-           base_size = 100
-           ) %>%
-  gf_text(0 ~ 0, label = ~mean, color = 'grey44', size = 10) %>%
-  gf_refine(coord_polar(theta = "y", start = -pi/2),
-            guides(fill = FALSE, color = FALSE)) %>%
-  gf_lims(x = c(0, 2), y = c(0,8)) %>% 
-  gf_facet_wrap(~question, nrow = 2)
+plot_gauges(s3, nrows = 2, dir = -1)
   
 ```
 
@@ -449,11 +428,34 @@ gf_rect(0 + 4 ~ 1 + 2,
 <!-- *Research approved by Calvin University IRB* -->
 
 ---
+
+# Students: Difficulty of Tasks
+
+```{r, echo = FALSE, fig.width = 10, fig.height = 9}
+s4 <- students_lik %>%
+  filter(question %in% c('partner_expectations',
+                         'partner_logistics',
+                         'get_data')) %>%
+  mutate(question = factor(case_when(question == 'partner_expectations' ~ "Expectations",
+                              question == 'partner_logistics' ~ "Logistics",
+                              question == 'get_data' ~ 'Data Sharing',
+                              # question == 'useful_to_partner' ~ 'Useful to Partner',
+                              question == 'tables' ~ 'Tables',
+                              TRUE ~ ' '))) %>%
+  mutate(question = forcats::fct_relevel(question,
+                                         "Expectations",
+                                         'Logistics',
+                                         'Data Sharing'))
+plot_gauges(s4, dir = -1 )
+  
+```
+
+---
+
 # Partner Survey (n = 7, 50%)
 
 - need to fill in results and details here
 
-*Research approved by Calvin University IRB*
 
 
 ---
