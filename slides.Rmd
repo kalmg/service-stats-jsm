@@ -27,12 +27,13 @@ knitr::opts_chunk$set(
 require(ggiraphExtra)
 require(moonBook)
 require(tidyverse)
+require(scales)
 library(mosaic)
 library(ggformula)
 library(gifski)
 require(plotly)
 
-theme_set(theme_bw(base_size = 26))
+theme_set(theme_minimal(base_size = 20))
 
 require(qualtRics)
 survey <- read_survey('data/s245-survey.csv') %>%
@@ -84,13 +85,50 @@ students_lik <- students %>%
   group_by(question) %>%
   summarize(mean = mean(response, na.rm = TRUE) %>%
               round(digits = 2),
+            ci_lo = mean(response, na.rm = TRUE) - 2 * (sd(response, na.rm = TRUE) / sqrt(n())),
+            ci_hi = mean(response, na.rm = TRUE) + 2 * (sd(response, na.rm = TRUE) / sqrt(n())),
             median = median(response, na.rm = TRUE)) %>%
   ungroup()
 
 # pal to use: RdYlGn inverted
 
 partners <- survey %>%
-  filter(person == 'partner')
+  filter(person == 'partner') %>%
+  rename(Motivation = Q4,
+         `Useful Data Feedback` = Q5_1,
+         Figures = Q5_2,
+         Models = Q5_3,
+         Interpretation = Q5_4,
+         Overall = Q5_5,
+         `Most Valued` = Q6,
+         `Likely Repeat` = Q7,
+         `Why Repeat` = Q9)
+
+partners_lik <- partners %>%
+  select(-`Most Valued`, -`Why Repeat`) %>%
+  select(person, Motivation:`Likely Repeat`) %>%
+  pivot_longer(-person, names_to = "question", values_to = "response") %>%
+  mutate(response = case_when(response == 'Not useful' ~ '0',
+                              response == 'Slightly useful' ~ '1',
+                              response == 'Moderately useful' ~ '2',
+                              response == 'Very useful' ~ '3',
+                              response == 'Extremely useful' ~ '4',
+                              response == 'Extremely unlikely' ~ '0',
+                              response == 'Somewhat unlikely' ~ '1',
+                              response == 'Neutral' ~ '2',
+                              response == 'Somewhat likely' ~ '3',
+                              response == 'Extremely likely' ~ '4',
+                              TRUE ~ 'not a number')) %>%
+  mutate(response = parse_number(response)) %>%
+  group_by(question) %>%
+  summarize(mean = mean(response, na.rm = TRUE) %>%
+              round(digits = 2),
+            ci_lo = mean(response, na.rm = TRUE) - 2 * (sd(response, na.rm = TRUE) / sqrt(n())),
+            ci_hi = mean(response, na.rm = TRUE) + 2 * (sd(response, na.rm = TRUE) / sqrt(n())),
+            median = median(response, na.rm = TRUE)) %>%
+  ungroup()
+
+  
 
 
 hours_dir <- "C:/Users/Stacy DeRuiter/Dropbox/CalvinTeaching/STAT245/Fall2019/Projects/"
@@ -186,7 +224,7 @@ Thanks to:
 <br>
 <br>
 <br>
-*images: mfviz.com/hierarchical-models, knowledgebase.aridhia.com/article/logistic-regression/*
+*images: mfviz.com/hierarchical-models, overstock.com, knowledgebase.aridhia.com/article/logistic-regression/*
 
 ---
 
@@ -207,7 +245,7 @@ Thanks to:
 <br>
 <br>
 <br>
-*images: mfviz.com/hierarchical-models, knowledgebase.aridhia.com/article/logistic-regression/*
+*images: mfviz.com/hierarchical-models, overstock.com, knowledgebase.aridhia.com/article/logistic-regression/*
 
 ---
 
@@ -224,7 +262,7 @@ Thanks to:
 </p>
 
 <br>
-*images: mfviz.com/hierarchical-models, knowledgebase.aridhia.com/article/logistic-regression/*
+*images: mfviz.com/hierarchical-models, overstock.com, knowledgebase.aridhia.com/article/logistic-regression/*
 ---
 
 # Applied Regression; or, GLMs & Friends
@@ -332,7 +370,7 @@ class: inverse middle center big-subsection
 ## Goal: 40 hours or 4-5 hours per week
 <br>
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width = 7.5, fig.height = 3.5}
 gf_dhistogram(~total_hours, data = hours19, 
              binwidth = 5,
              xlab = 'Total Hours Worked per Student',
@@ -354,29 +392,32 @@ s1 <- students_lik %>%
                               question == 'useful_to_partner' ~ 'Useful to Partner',
                               question == 'liked_giving_back' ~ 'Liked Giving Back',
                               TRUE ~ ' '))
-theme_set(theme_void(base_size = 26))
-
 plot_gauges <- function(data, nrows = 1, dir = -1){
+  theme_set(theme_void(base_size = 20))
 gf_rect(0 + 4 ~ 1 + 2,
         color = 'black', fill = 'grey44', size = 2, data = data) %>%
-  gf_rect(0 + mean ~ 1 + 2, 
-          fill = ~mean, color = 'black',
+  
+    gf_rect(0 + ci_lo ~ 1 + 2, 
+          fill = ~mean,
           size = 2)   %>%
+    gf_rect(0 + ci_hi ~ 1 + 2, 
+          fill = ~mean,
+          size = 2, alpha = 0.3)   %>%
+    gf_rect(0 + mean ~ 1 + 2, 
+          fill = ~mean, color = 'black',
+          size = 2, alpha = 0.3)   %>%
+    
   gf_theme(scale_fill_distiller(palette = 'RdYlGn', direction = dir, limits = c(0,4)),
            scale_color_distiller(palette = 'RdYlGn', direction = dir, limits = c(0,4)),
-           strip.background = element_blank(),
-           #strip.text.x = element_blank(),
-           #strip.text = element_text(size = 30)
-           base_size = 100
-           ) %>%
-  gf_text(0 ~ 0, label = ~mean, color = 'grey44', size = 10) %>%
+           strip.background = element_blank() ) %>%
+  gf_text(0 ~ 0, label = ~mean, color = 'grey44', size = 7) %>%
   gf_refine(coord_polar(theta = "y", start = -pi/2),
             guides(fill = FALSE, color = FALSE)) %>%
   gf_lims(x = c(0, 2), y = c(0,8)) %>% 
   gf_facet_wrap(~question, nrow = nrows)
 }
 
-plot_gauges(s1)
+plot_gauges(s1, dir = 1)
   
 ```
 
@@ -404,7 +445,7 @@ plot_gauges(s2, dir = 1)
 
 # Students: Difficulty of Tasks
 
-```{r, echo = FALSE, out.height='80%'}
+```{r, echo = FALSE, out.width='95%'}
 s3 <- students_lik %>%
   filter(question %in% c('understand_context',
                          'formulate_qs',
@@ -441,7 +482,7 @@ plot_gauges(s3, nrows = 2, dir = -1)
 
 # Students: Working with Partners
 
-```{r, echo = FALSE, fig.width = 10, fig.height = 9}
+```{r, echo = FALSE}
 s4 <- students_lik %>%
   filter(question %in% c('partner_expectations',
                          'partner_logistics',
@@ -468,7 +509,79 @@ class: inverse middle center big-subsection
 
 # Partner Survey (n = 7, 50%)
 
-- need to fill in results and details here
+## Motivation: They do it for us!
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+theme_set(theme_minimal(base_size = 28))
+
+pm <- partners %>%
+  select(Motivation) %>%
+  mutate(`Enjoy Students` = grepl('enjoy working with students', Motivation),
+         `Data Needs` = grepl('have data analysis needs', Motivation),
+         `Build Community` = grepl('build community', Motivation),
+         `Future Workforce` = grepl('attract potential interns', Motivation)) %>%
+    pivot_longer(-Motivation, names_to = 'reason', values_to = 'response') %>%
+  group_by(reason) %>%
+  summarize(Proportion = sum(response) / n(),
+            n = n()) %>%
+  mutate(se = sqrt(Proportion * (1-Proportion) / n)) %>%
+  ungroup() %>%
+  mutate(reason = factor(reason)) %>%
+  mutate(reason = forcats::fct_reorder(reason, Proportion),
+         who = c('give', 'take', 'give', 'take'))
+
+gf_colh(reason ~ Proportion,
+        data = pm,
+        fill = ~who,
+        color = 'grey44',
+        ylab = '',
+        xlab = '') %>%
+  gf_errorbarh(reason ~ (Proportion - 2*se) + (Proportion + 2*se),
+               width = 0.2, size = 1.5, color = 'grey44') %>%
+  gf_refine(scale_fill_viridis_d(begin = 0.3),
+            scale_x_continuous(labels = percent_format(), limits=c(0,1))) %>%
+  gf_theme(guides(fill = FALSE))
+```
+
+---
+
+# Partner Experience
+
+## How Useful were Results?
+
+```{r}
+p1 <- partners_lik %>%
+  filter(question %in% c('Useful Data Feedback', 
+                         'Figures',
+                         'Models',
+                         'Interpretation',
+                         'Overall',
+                         'Likely Repeat')) %>%
+  mutate(question = factor(question),
+         question = forcats::fct_relevel(question,
+                                         'Useful Data Feedback',
+                                         'Figures',
+                                         'Models',
+                                         'Interpretation',
+                                         'Overall',
+                                         'Likely Repeat'))
+
+plot_gauges(p1, nrows = 2, dir = 1)
+```
+
+---
+
+# Some Reflections
+
+- Gratitude to partners
+- Incredible learning opportunity
+- Build connection and community
+- Weak business plan
+  - Time constraints
+  - Division of attention: normal course content, project
+- Practice learning *by doing* in community; not learn, *then* do
+- Experience "real" statistical process
+
 
 
 
@@ -499,7 +612,7 @@ class: inverse middle center big-subsection
 - Projects yield 
   - motivation + struggle
   - success if viz and models *communicate clearly*
-  - big-picture thinking
+  - practice, internalize statistical process
   - connections across the curriculum
 - It’s not (too) hard to mastermind
 
