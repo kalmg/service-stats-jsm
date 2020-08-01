@@ -345,7 +345,7 @@ s1 <- students_lik %>%
                               question == 'useful_to_partner' ~ 'Useful to Partner',
                               question == 'liked_giving_back' ~ 'Liked Giving Back',
                               TRUE ~ ' '))
-theme_set(theme_void(base_size = 28))
+theme_set(theme_void(base_size = 26))
 
 plot_gauges <- function(data, nrows = 1, dir = -1){
 gf_rect(0 + 4 ~ 1 + 2,
@@ -370,6 +370,7 @@ gf_rect(0 + 4 ~ 1 + 2,
 plot_gauges(s1)
   
 ```
+
 ---
 
 # Students: Assessment of Group Work
@@ -394,7 +395,7 @@ plot_gauges(s2, dir = 1)
 
 # Students: Difficulty of Tasks
 
-```{r, echo = FALSE, fig.width = 10, fig.height = 9}
+```{r, echo = FALSE, out.height='80%'}
 s3 <- students_lik %>%
   filter(question %in% c('understand_context',
                          'formulate_qs',
@@ -429,7 +430,7 @@ plot_gauges(s3, nrows = 2, dir = -1)
 
 ---
 
-# Students: Difficulty of Tasks
+# Students: Working with Partners
 
 ```{r, echo = FALSE, fig.width = 10, fig.height = 9}
 s4 <- students_lik %>%
@@ -492,7 +493,7 @@ plot_gauges(s4, dir = -1 )
 
 - Student engagement?
 - Value for partner organizations?
-- How can we turn time limitation into an asset?
+- How can we turn **time limitation** into an asset?
 
 ---
 ## Thank You!
@@ -502,5 +503,7 @@ plot_gauges(s4, dir = -1 )
 ### Contact Stacy DeRuiter
 ### Email: sld33@calvin.edu
 ### Twitter: @slderuiter
+
+Slides: <https://stacyderuiter.github.io/service-stats-jsm/slides.html>
 
 
